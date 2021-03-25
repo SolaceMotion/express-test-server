@@ -5,13 +5,13 @@ const path = require("path")
 const lessMiddleware = require("less-middleware")
 
 const app = express()
-const port = 3000
+
 
 app.use(lessMiddleware(__dirname, + "public" ))
 app.use(express.urlencoded({ extended: false })) //Global function that runs on every request
 
 app.use(fileUpload({
-    tempFileDir: '/tmp'
+   
 }))
 
 app.use(session({
@@ -28,6 +28,7 @@ app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'views'))
 
 app.use(express.static(path.join(__dirname, "/public")))
+app.use(express.static(path.join(__dirname, "/tmp")))
 
 function getWeather(req, res, next) { //Middleware, call next to move on to the next function
     req.visitorWeather = true
@@ -51,17 +52,25 @@ app.get('/about', (req, res) => { //request, response. The first thing that expr
     res.send("Thanks for learning")
 })
 
-app.post('/result', (req, res) => {
-    
-    if (req.body.color.trim().toLowerCase() == "blue") { //trim method removes spaces, toLowerCase will convert the text into lowercase
-        res.send("That is correct.")
-    } else {
-        res.send("incorrect")
-    }
-})
-
-app.get('/result', (req, res) => {
+/* app.get('/result', (req, res) => {
     res.send("You didn't submit the form")
+}) */
+
+app.post('/result', (req, res) => {
+    if (!req.files || Object.keys(req.files).length == 0) {
+        return res.status(400).send("No files uploaded")
+    } //instead of else, if something returns it wil jump out and stop executing.
+
+    let uploadPath = path.join(__dirname, '/tmp', req.files.file.name)
+
+    req.files.file.mv(uploadPath, err => {
+        if (err) return res.status(500).sendDate(err)
+    })
+
+    res.send(`
+        <p>Your uploaded file</p>
+        <img width="400" src="/${req.files.file.name}" alt="Uploaded File">
+    `)
 })
 
 app.get("/api/pets", (req, res) => {
@@ -70,6 +79,8 @@ app.get("/api/pets", (req, res) => {
         { name: "Sebastian", species: "elephant" }
     ])
 })
+
+const port = 3000
 
 app.listen(port, () => {
     console.log(`Listening at http://localhost:${port}`)

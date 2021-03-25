@@ -10,6 +10,10 @@ const port = 3000
 app.use(lessMiddleware(__dirname, + "public" ))
 app.use(express.urlencoded({ extended: false })) //Global function that runs on every request
 
+app.use(fileUpload({
+    tempFileDir: '/tmp'
+}))
+
 app.use(session({
     secret: 'The session',
     resave: false,
@@ -17,7 +21,7 @@ app.use(session({
     cookie: { secure: true }
 }))
 
-var sess;
+let sess;
 
 app.use(getWeather)
 app.set('view engine', 'ejs')
@@ -34,7 +38,7 @@ function getWeather(req, res, next) { //Middleware, call next to move on to the 
 app.get('/', (req, res) => { //request, response
     const isRaining = req.visitorWeather ? "It is raining" : "It is not raining"
     res.render("home", {
-        isRaining: req.visitorWeather,
+        isRaining,
         pets: [
             { name: "Oliver", species: "cat" }, 
             { name: "Sebastian", species: "elephant" }
@@ -48,6 +52,7 @@ app.get('/about', (req, res) => { //request, response. The first thing that expr
 })
 
 app.post('/result', (req, res) => {
+    
     if (req.body.color.trim().toLowerCase() == "blue") { //trim method removes spaces, toLowerCase will convert the text into lowercase
         res.send("That is correct.")
     } else {
@@ -56,7 +61,7 @@ app.post('/result', (req, res) => {
 })
 
 app.get('/result', (req, res) => {
-    res.send("Why.")
+    res.send("You didn't submit the form")
 })
 
 app.get("/api/pets", (req, res) => {

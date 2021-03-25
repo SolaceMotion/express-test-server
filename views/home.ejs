@@ -9,16 +9,19 @@
 </head>
 <body>
     What color is the sky on a clear day?
-    <form action="/result" method="post">
+    <form action="/result" method="post" enctype="multipart/form-data">
         <input type="text" name="color" />
+        <input type="file" name="file" />
         <input type="submit" value="GO" />
     </form>
 
-    <% if (isRaining) { %>
+    <%= isRaining %>
+    
+    <!-- <% if (isRaining) { %>
         <h1>it is raining</h1>
     <% } else { %>
         <h1>It is not raining</h1>
-    <% } %>
+    <% } %> -->
 
     <% pets.forEach(pet => { %>
         <li> <%= pet.name %> (<%= pet.species %>)</li>
